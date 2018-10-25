@@ -9,8 +9,19 @@
 </head>
 <body>
 
-  <audio style="position:fixed;" id="audio" src="audio/Aril Brikha - Palma.mp3" controls></audio>
+  <audio class="audio" id="audio" src="audio/agar-agar-aquarium.mp3" controls></audio>
 
+  <style>
+    .audio {
+      position: fixed;
+      opacity: 0;
+      transition: opacity 0.2s ease
+    }
+    .audio:hover {
+      opacity: 1;
+      transition: opacity 0.2s ease
+    }
+  </style>
 </body>
 <script src="js/bundle.js"></script>
 </html>
