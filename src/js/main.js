@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 let scene = new THREE.Scene();
-scene.background = new THREE.Color(0xdce0e1);
+scene.background = new THREE.Color(0x000000);
 let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 5;
 let renderer = new THREE.WebGLRenderer();
@@ -18,22 +18,27 @@ let frequencyData = new Uint8Array(analyser.frequencyBinCount);
 
 
 let geometries = [];
-let materials = [];
-let planes = [];
-let max = 50
+let wireframes = []
+let lines = [];
+let objs = [];
+let max = 400
 
 init();
 
 function init() {
 
 	for (let i = 0; i < max; i += 1) {
-		geometries[i] = new THREE.CircleGeometry(1, 32);
-		materials[i] = new THREE.MeshBasicMaterial({color: 0x000000, side: THREE.DoubleSide});
-		planes[i] = new THREE.Mesh(geometries[i], materials[i]);
-		// planes[i].position.x = -1.25 + (Math.PI / max) * i
-		// planes[i].position.y = -1.25 + (Math.PI / max) * i
-		planes[i].rotation.z = (max / 360) * i
-		scene.add(planes[i]);
+		geometries[i] = new THREE.CircleBufferGeometry(2, 1);
+		wireframes[i] = new THREE.WireframeGeometry(geometries[i]);
+		lines[i] = new THREE.LineSegments(wireframes[i]);
+		lines[i].material.depthTest = false;
+		lines[i].material.opacity = 1;
+		lines[i].material.transparent = true;
+
+		// lines[i].position.x = -1.25 + (Math.PI / max) * i
+		// lines[i].position.y = -1.25 + (Math.PI / max) * i
+
+		scene.add(lines[i]);
 	}
 
 	animate();
@@ -45,9 +50,9 @@ function render() {
 	analyser.getByteFrequencyData(frequencyData);
 
 	for (let i = 0; i < max; i += 1) {
-		planes[i].rotation.z += frequencyData[4] * 0.00001
-		planes[i].scale.set(1, 1 + frequencyData[i] / 200, 1)
-		planes[i].material.color.setRGB((frequencyData[i + 100]/255),(frequencyData[i + 100]/255),(frequencyData[i + 100]/255));
+		lines[i].rotation.z += frequencyData[i] * 0.00001
+		lines[i].scale.set(0.1 + frequencyData[i] / 250, 0.1 + frequencyData[i] / 250, 0.1 + frequencyData[i] / 250)
+		lines[i].material.color.setRGB(frequencyData[i] / 400, frequencyData[i] / 450, frequencyData[i] / 400);
 	}
 }
 
