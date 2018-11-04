@@ -18,41 +18,65 @@ let frequencyData = new Uint8Array(analyser.frequencyBinCount);
 
 
 let geometries = [];
-let wireframes = []
-let lines = [];
+let materials = []
+let circles = [];
 let objs = [];
-let max = 400
+let max = 100
+let i = 0 // current index
+let r = 0.5
 
 init();
 
 function init() {
 
 	for (let i = 0; i < max; i += 1) {
-		geometries[i] = new THREE.CircleBufferGeometry(2, 1);
-		wireframes[i] = new THREE.WireframeGeometry(geometries[i]);
-		lines[i] = new THREE.LineSegments(wireframes[i]);
-		lines[i].material.depthTest = false;
-		lines[i].material.opacity = 1;
-		lines[i].material.transparent = true;
+		const r = Math.random() * 2
+		geometries[i] = new THREE.RingGeometry(r, r + 0.01, 64);
+		materials[i] = new THREE.MeshBasicMaterial({side: THREE.DoubleSide});
+		circles[i] = new THREE.Mesh(geometries[i], materials[i])
 
-		// lines[i].position.x = -1.25 + (Math.PI / max) * i
-		// lines[i].position.y = -1.25 + (Math.PI / max) * i
-
-		scene.add(lines[i]);
+		scene.add(circles[i]);
 	}
 
+	// createCircles()
+
 	animate();
-	// window.addEventListener('click', () => audio.play())
 }
+
+function createCircles () {
+
+	setInterval(() => {
+
+		if (circles[i]) {
+			scene.remove(circles[i])
+		}
+
+		const r = Math.random() * 2
+		geometries[i] = new THREE.RingGeometry(r, r + 0.01, 64);
+		materials[i] = new THREE.MeshBasicMaterial();
+		circles[i] = new THREE.Mesh(geometries[i], materials[i])
+		scene.add(circles[i]);
+
+		i = i + 1
+		if (i === max) i = 0
+
+	}, 1000)
+
+}
+
 
 function render() {
 
 	analyser.getByteFrequencyData(frequencyData);
 
 	for (let i = 0; i < max; i += 1) {
-		lines[i].rotation.z += frequencyData[i] * 0.00001
-		lines[i].scale.set(0.1 + frequencyData[i] / 250, 0.1 + frequencyData[i] / 250, 0.1 + frequencyData[i] / 250)
-		lines[i].material.color.setRGB(frequencyData[i] / 400, frequencyData[i] / 450, frequencyData[i] / 400);
+		if (!circles[i]) return;
+
+		// circles[i].position.set(frequencyData[i] / 250, frequencyData[i] / 250, frequencyData[i] / 250)
+		circles[i].rotation.y += frequencyData[i] * 0.0001
+		circles[i].rotation.x += frequencyData[i] * 0.0001
+		circles[i].scale.set(frequencyData[i] / 150, frequencyData[i] / 250, frequencyData[i] / 150)
+		circles[i].material.color.setHex((frequencyData[i] / 100) * 0xffffff);
 	}
 }
 
