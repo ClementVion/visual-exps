@@ -19,69 +19,73 @@ let frequencyData = new Uint8Array(analyser.frequencyBinCount);
 
 let geometries = [];
 let materials = []
-let circles = [];
+let lines = [];
 let objs = [];
-let max = 100
-let i = 0 // current index
-let r = 0.5
+let max = 6
 
 init();
 
 function init() {
 
 	for (let i = 0; i < max; i += 1) {
-		const r = Math.random() * 2
-		geometries[i] = new THREE.RingGeometry(r, r + 0.01, 64);
-		materials[i] = new THREE.MeshBasicMaterial({side: THREE.DoubleSide});
-		circles[i] = new THREE.Mesh(geometries[i], materials[i])
 
-		scene.add(circles[i]);
+		materials[i] = new THREE.LineBasicMaterial({color: 0xffffff})
+
+		geometries[i] = new THREE.Geometry();
+		for (let v = -3; v < 3; v += 0.1) {
+			geometries[i].vertices.push(new THREE.Vector3(v, 0, 0));
+		}
+
+		lines[i] = new THREE.Line(geometries[i], materials[i]);
+
+		scene.add(lines[i])
 	}
-
-	// createCircles()
 
 	animate();
 }
 
-function createCircles () {
+function displaceVertices(line, dX, dY, size, magnitude, speed, ts) {
 
-	setInterval(() => {
+  for (let i = 0; i < line.geometry.vertices.length; i++) {
+    let vertice = line.geometry.vertices[i]
+    let distance = new THREE.Vector2(vertice.x, vertice.y).sub(new THREE.Vector2(dX, dY))
 
-		if (circles[i]) {
-			scene.remove(circles[i])
-		}
+    vertice.y = Math.sin(distance.length() / size + (ts/speed)) * magnitude
+  }
 
-		const r = Math.random() * 2
-		geometries[i] = new THREE.RingGeometry(r, r + 0.01, 64);
-		materials[i] = new THREE.MeshBasicMaterial();
-		circles[i] = new THREE.Mesh(geometries[i], materials[i])
-		scene.add(circles[i]);
-
-		i = i + 1
-		if (i === max) i = 0
-
-	}, 1000)
+  line.geometry.verticesNeedUpdate = true
 
 }
 
 
-function render() {
+function render(ts) {
 
 	analyser.getByteFrequencyData(frequencyData);
 
 	for (let i = 0; i < max; i += 1) {
-		if (!circles[i]) return;
 
-		// circles[i].position.set(frequencyData[i] / 250, frequencyData[i] / 250, frequencyData[i] / 250)
-		circles[i].rotation.y += frequencyData[i] * 0.0001
-		circles[i].rotation.x += frequencyData[i] * 0.0001
-		circles[i].scale.set(frequencyData[i] / 150, frequencyData[i] / 250, frequencyData[i] / 150)
-		circles[i].material.color.setHex((frequencyData[i] / 100) * 0xffffff);
+		for (let v = 0; v < lines[i].geometry.vertices.length; v += 1) {
+
+			// lines[i].geometry.vertices[v].z = frequencyData[i] / 100
+			displaceVertices(
+				lines[i],
+				0, //dX
+				frequencyData[i] / 400, //dY
+				frequencyData[i] / 250,  //size
+				frequencyData[i] / 100, //magnitude
+				1000, //speed
+				ts)
+
+		}
+
+		// lines[i].geometry.verticesNeedUpdate = true
+
 	}
+
 }
 
-function animate() {
+function animate(ts) {
 	requestAnimationFrame(animate);
-	render();
+	render(ts);
 	renderer.render(scene, camera);
 }
