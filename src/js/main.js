@@ -3,7 +3,10 @@ import * as THREE from 'three';
 let scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
 let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.x = 0;
+camera.position.y = 0;
 camera.position.z = 5;
+camera.lookAt(0, 0, 0)
 let renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -21,7 +24,7 @@ let geometries = [];
 let materials = []
 let lines = [];
 let objs = [];
-let max = 6
+let max = 200
 
 init();
 
@@ -32,17 +35,21 @@ function init() {
 		materials[i] = new THREE.LineBasicMaterial({color: 0xffffff})
 
 		geometries[i] = new THREE.Geometry();
-		for (let v = -3; v < 3; v += 0.1) {
+		for (let v = -2; v < 2; v += 0.1) {
 			geometries[i].vertices.push(new THREE.Vector3(v, 0, 0));
+			// geometries[i].vertices.push(new THREE.Vector3(0, v + i, 0));
 		}
 
 		lines[i] = new THREE.Line(geometries[i], materials[i]);
+
+		lines[i].rotation.z = i
 
 		scene.add(lines[i])
 	}
 
 	animate();
 }
+
 
 function displaceVertices(line, dX, dY, size, magnitude, speed, ts) {
 
@@ -66,19 +73,20 @@ function render(ts) {
 
 		for (let v = 0; v < lines[i].geometry.vertices.length; v += 1) {
 
-			// lines[i].geometry.vertices[v].z = frequencyData[i] / 100
 			displaceVertices(
 				lines[i],
-				0, //dX
-				frequencyData[i] / 400, //dY
-				frequencyData[i] / 250,  //size
-				frequencyData[i] / 100, //magnitude
-				1000, //speed
-				ts)
+				-10, //dX
+			  5, //dY
+				frequencyData[i + v] / 20,  //size
+				frequencyData[i + v] / 75, //magnitude
+				frequencyData[i + v] * 150, //speed
+				ts
+			)
 
 		}
+		lines[i].geometry.verticesNeedUpdate = true
 
-		// lines[i].geometry.verticesNeedUpdate = true
+		// lines[i].rotation.z += frequencyData[i] * 0.00001
 
 	}
 
