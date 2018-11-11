@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 
 let scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000);
+scene.background = new THREE.Color(0x0b0b0d);
 let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.x = 0;
+camera.position.x = 12
 camera.position.y = 0;
 camera.position.z = 5;
-camera.lookAt(0, 0, 0)
+// camera.lookAt(0, 0, 0)
 let renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -22,45 +22,43 @@ let frequencyData = new Uint8Array(analyser.frequencyBinCount);
 
 let geometries = [];
 let materials = []
-let lines = [];
+let planes = [];
 let objs = [];
-let max = 200
+let max = 40
 
 init();
 
 function init() {
 
-	for (let i = 0; i < max; i += 1) {
+	for (let i = -max; i < max; i += 1) {
 
-		materials[i] = new THREE.LineBasicMaterial({color: 0xffffff})
+		materials[i] = new THREE.MeshBasicMaterial({
+			color: 0xb4b4b6
+		})
 
-		geometries[i] = new THREE.Geometry();
-		for (let v = -2; v < 2; v += 0.1) {
-			geometries[i].vertices.push(new THREE.Vector3(v, 0, 0));
-			// geometries[i].vertices.push(new THREE.Vector3(0, v + i, 0));
-		}
+		geometries[i] = new THREE.PlaneGeometry(0.25, 15, 40, 40);
+		planes[i] = new THREE.Mesh(geometries[i], materials[i]);
 
-		lines[i] = new THREE.Line(geometries[i], materials[i]);
+		planes[i].rotation.z = -Math.PI / 4
+		planes[i].position.x = i * 0.75
 
-		lines[i].rotation.z = i
-
-		scene.add(lines[i])
+		scene.add(planes[i])
 	}
 
 	animate();
 }
 
 
-function displaceVertices(line, dX, dY, size, magnitude, speed, ts) {
+function displaceVertices(obj, dX, dY, dZ, size, magnitude, speed, ts) {
 
-  for (let i = 0; i < line.geometry.vertices.length; i++) {
-    let vertice = line.geometry.vertices[i]
-    let distance = new THREE.Vector2(vertice.x, vertice.y).sub(new THREE.Vector2(dX, dY))
+  for (let i = 0; i < obj.geometry.vertices.length; i++) {
+    let vertice = obj.geometry.vertices[i]
+    let distance = new THREE.Vector3(vertice.x, vertice.y, vertice.z).sub(new THREE.Vector3(dX, dY, dZ))
 
-    vertice.y = Math.sin(distance.length() / size + (ts/speed)) * magnitude
+    vertice.z = Math.sin(distance.length() / size + (ts/speed)) * magnitude
   }
 
-  line.geometry.verticesNeedUpdate = true
+  obj.geometry.verticesNeedUpdate = true
 
 }
 
@@ -69,25 +67,20 @@ function render(ts) {
 
 	analyser.getByteFrequencyData(frequencyData);
 
-	for (let i = 0; i < max; i += 1) {
+	for (let i = -max; i < max; i += 1) {
 
-		for (let v = 0; v < lines[i].geometry.vertices.length; v += 1) {
+		displaceVertices(
+			planes[i],
+			0, //dX
+		  0, //dY
+		  1, //dZ
+			2,  //size
+			frequencyData[i] / 300, //magnitude
+			400, //speed
+			ts
+		)
 
-			displaceVertices(
-				lines[i],
-				-10, //dX
-			  5, //dY
-				frequencyData[i + v] / 20,  //size
-				frequencyData[i + v] / 75, //magnitude
-				frequencyData[i + v] * 150, //speed
-				ts
-			)
-
-		}
-		lines[i].geometry.verticesNeedUpdate = true
-
-		// lines[i].rotation.z += frequencyData[i] * 0.00001
-
+		// planes[i].rotation.z += frequencyData[i] * 0.00001
 	}
 
 }
