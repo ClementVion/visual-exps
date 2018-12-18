@@ -4,8 +4,8 @@ let scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b0b0d);
 let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.x = 0
-camera.position.y = 0;
-camera.position.z = 5;
+camera.position.y = 3;
+camera.position.z = 6;
 // camera.lookAt(0, 0, 0)
 let renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -23,7 +23,7 @@ let frequencyData = new Uint8Array(analyser.frequencyBinCount);
 let geometries = [];
 let materials = []
 let objs = [];
-let max = 60
+let max = 40
 
 init();
 
@@ -40,6 +40,7 @@ function init() {
 		}
 
 		objs[i] = new THREE.Line(geometries[i], materials[i]);
+		objs[i].position.y = i * 0.15;
 
 		scene.add(objs[i])
 	}
@@ -73,13 +74,13 @@ function render(ts) {
 			0, //dX
 		  0, //dY
 		  1, //dZ
-			2,  //size
+			1,  //size
 			frequencyData[i] / 300, //magnitude
-			400, //speed
+			frequencyData[0] * 50, //speed
 			ts
 		)
 
-		objs[i].rotation.z += frequencyData[i] * 0.0001
+		// objs[i].rotation.z += frequencyData[i] * 0.0001
 		objs[i].scale.x = frequencyData[i] * 0.001
 	}
 
