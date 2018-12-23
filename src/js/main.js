@@ -23,8 +23,8 @@ let frequencyData = new Uint8Array(analyser.frequencyBinCount);
 let geometries = [];
 let materials = []
 let objs = [];
-let max = 50;
-let min = -50;
+let max = 10;
+let min = -10;
 let distance = Math.PI * 2 / max
 
 init();
@@ -37,12 +37,12 @@ function init() {
 
 		geometries[i] = new THREE.Geometry();
 
-		for (let v = -10; v < 10; v += 0.1) {
-			geometries[i].vertices.push(new THREE.Vector3(v, 0, 0))
+		for (let v = -15; v < 15; v += 0.1) {
+			geometries[i].vertices.push(new THREE.Vector3(0, v, 0))
 		}
 
 		objs[i] = new THREE.Line(geometries[i], materials[i]);
-		objs[i].position.y = i * 0.15;
+		objs[i].position.x = i * 0.25;
 		// objs[i].rotation.z = distance * i
 
 		scene.add(objs[i])
@@ -75,16 +75,16 @@ function render(ts) {
 		displaceVertices(
 			objs[i],
 			0, //dX
-		  0, //dY
+		  10, //dY
 		  0, //dZ
-			1,  //size
-			frequencyData[max + i] / 50, //magnitude
+			frequencyData[0] / 200,  //size
+			frequencyData[max + i] / 100, //magnitude
 			600, //speed
 			ts
 		)
 
-		// objs[i].rotation.z += frequencyData[i] * 0.0001
-		// objs[i].scale.x = frequencyData[0] * 0.001
+		// objs[i].rotation.x += frequencyData[max + i] * 0.0001
+		// objs[i].scale.y = frequencyData[max + i] * 0.001
 	}
 
 }
