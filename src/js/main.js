@@ -4,9 +4,9 @@ let scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b0b0d);
 let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.x = 0
-camera.position.y = 3;
+camera.position.y = 0;
 camera.position.z = 6;
-// camera.lookAt(0, 0, 0)
+camera.lookAt(0, 0, 0)
 let renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -23,24 +23,27 @@ let frequencyData = new Uint8Array(analyser.frequencyBinCount);
 let geometries = [];
 let materials = []
 let objs = [];
-let max = 40
+let max = 50;
+let min = -50;
+let distance = Math.PI * 2 / max
 
 init();
 
 function init() {
 
-	for (let i = 0; i < max; i += 1) {
+	for (let i = min; i < max; i += 1) {
 
 		materials[i] = new THREE.LineBasicMaterial( { color: 0xffffff } );
 
 		geometries[i] = new THREE.Geometry();
 
-		for (let v = -5; v < 5; v += 0.1) {
+		for (let v = -10; v < 10; v += 0.1) {
 			geometries[i].vertices.push(new THREE.Vector3(v, 0, 0))
 		}
 
 		objs[i] = new THREE.Line(geometries[i], materials[i]);
 		objs[i].position.y = i * 0.15;
+		// objs[i].rotation.z = distance * i
 
 		scene.add(objs[i])
 	}
@@ -55,7 +58,7 @@ function displaceVertices(obj, dX, dY, dZ, size, magnitude, speed, ts) {
     let vertice = obj.geometry.vertices[i]
     let distance = new THREE.Vector3(vertice.x, vertice.y, vertice.z).sub(new THREE.Vector3(dX, dY, dZ))
 
-    vertice.y = Math.sin(distance.length() / size + (ts/speed)) * magnitude
+    vertice.z = Math.sin(distance.length() / size + (ts/speed)) * magnitude
   }
 
   obj.geometry.verticesNeedUpdate = true
@@ -67,21 +70,21 @@ function render(ts) {
 
 	analyser.getByteFrequencyData(frequencyData);
 
-	for (let i = 0; i < max; i += 1) {
+	for (let i = min; i < max; i += 1) {
 
 		displaceVertices(
 			objs[i],
 			0, //dX
 		  0, //dY
-		  1, //dZ
+		  0, //dZ
 			1,  //size
-			frequencyData[i] / 300, //magnitude
-			frequencyData[0] * 50, //speed
+			frequencyData[max + i] / 50, //magnitude
+			600, //speed
 			ts
 		)
 
 		// objs[i].rotation.z += frequencyData[i] * 0.0001
-		objs[i].scale.x = frequencyData[i] * 0.001
+		// objs[i].scale.x = frequencyData[0] * 0.001
 	}
 
 }
