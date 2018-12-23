@@ -24,7 +24,7 @@ let geometries = [];
 let materials = []
 let objs = [];
 let max = 10;
-let min = -10;
+let min = 0;
 let distance = Math.PI * 2 / max
 
 init();
@@ -33,16 +33,16 @@ function init() {
 
 	for (let i = min; i < max; i += 1) {
 
-		materials[i] = new THREE.LineBasicMaterial( { color: 0xffffff } );
+		materials[i] = new THREE.LineBasicMaterial( { color: 0xffffff, transparent: true } );
 
 		geometries[i] = new THREE.Geometry();
 
-		for (let v = -15; v < 15; v += 0.1) {
+		for (let v = -8; v < 8; v += 0.1) {
 			geometries[i].vertices.push(new THREE.Vector3(0, v, 0))
 		}
 
 		objs[i] = new THREE.Line(geometries[i], materials[i]);
-		objs[i].position.x = i * 0.25;
+		objs[i].position.z = i * 0.25;
 		// objs[i].rotation.z = distance * i
 
 		scene.add(objs[i])
@@ -58,7 +58,7 @@ function displaceVertices(obj, dX, dY, dZ, size, magnitude, speed, ts) {
     let vertice = obj.geometry.vertices[i]
     let distance = new THREE.Vector3(vertice.x, vertice.y, vertice.z).sub(new THREE.Vector3(dX, dY, dZ))
 
-    vertice.z = Math.sin(distance.length() / size + (ts/speed)) * magnitude
+    vertice.x = Math.sin(distance.length() / size + (ts/speed)) * magnitude
   }
 
   obj.geometry.verticesNeedUpdate = true
@@ -74,17 +74,20 @@ function render(ts) {
 
 		displaceVertices(
 			objs[i],
-			0, //dX
-		  10, //dY
+			2, //dX
+		  20, //dY
 		  0, //dZ
-			frequencyData[0] / 200,  //size
-			frequencyData[max + i] / 100, //magnitude
-			600, //speed
+			frequencyData[i] / 200,  //size
+			frequencyData[i] / 150, //magnitude
+			frequencyData[i] * 150, //speed
 			ts
 		)
 
-		// objs[i].rotation.x += frequencyData[max + i] * 0.0001
-		// objs[i].scale.y = frequencyData[max + i] * 0.001
+		objs[i].material.color.setHex((frequencyData[i + 10] / 200) * 0xffffff);
+		objs[i].material.opacity = frequencyData[i] * 0.05;
+		objs[i].rotation.z += frequencyData[i + 10] * 0.0001
+		objs[i].scale.y = frequencyData[i] * 0.001
+		objs[i].scale.x = frequencyData[i] * 0.001
 	}
 
 }
