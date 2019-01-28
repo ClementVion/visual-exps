@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 let scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b0b0d);
-let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5);
 camera.position.x = 0
 camera.position.y = 0;
 camera.position.z = 6;
@@ -23,7 +23,7 @@ let frequencyData = new Uint8Array(analyser.frequencyBinCount);
 let geometries = [];
 let materials = []
 let objs = [];
-let max = 10;
+let max = 100;
 let min = 0;
 let distance = Math.PI * 2 / max
 
@@ -37,12 +37,12 @@ function init() {
 
 		geometries[i] = new THREE.Geometry();
 
-		for (let v = -8; v < 8; v += 0.1) {
-			geometries[i].vertices.push(new THREE.Vector3(0, v, 0))
+		for (let v = -2; v < 12; v += 0.1) {
+			geometries[i].vertices.push(new THREE.Vector3(0.2, 0, v))
 		}
 
 		objs[i] = new THREE.Line(geometries[i], materials[i]);
-		objs[i].position.z = i * 0.25;
+		// objs[i].position.z = i * 0.25;
 		// objs[i].rotation.z = distance * i
 
 		scene.add(objs[i])
@@ -58,7 +58,7 @@ function displaceVertices(obj, dX, dY, dZ, size, magnitude, speed, ts) {
     let vertice = obj.geometry.vertices[i]
     let distance = new THREE.Vector3(vertice.x, vertice.y, vertice.z).sub(new THREE.Vector3(dX, dY, dZ))
 
-    vertice.x = Math.sin(distance.length() / size + (ts/speed)) * magnitude
+    vertice.y = Math.sin(distance.length() / size + (ts/speed)) * magnitude
   }
 
   obj.geometry.verticesNeedUpdate = true
@@ -74,20 +74,20 @@ function render(ts) {
 
 		displaceVertices(
 			objs[i],
-			2, //dX
-		  20, //dY
-		  0, //dZ
-			frequencyData[i] / 200,  //size
-			frequencyData[i] / 150, //magnitude
-			frequencyData[i] * 150, //speed
+			0, //dX
+		  0, //dY
+		  200, //dZ
+			1,  //size
+			frequencyData[i] * 0.0075, //magnitude
+			1000, //speed
 			ts
 		)
 
-		objs[i].material.color.setHex((frequencyData[i + 10] / 200) * 0xffffff);
-		objs[i].material.opacity = frequencyData[i] * 0.05;
-		objs[i].rotation.z += frequencyData[i + 10] * 0.0001
-		objs[i].scale.y = frequencyData[i] * 0.001
-		objs[i].scale.x = frequencyData[i] * 0.001
+		// objs[i].material.color.setHex((frequencyData[i + 10] / 200) * 0xffffff);
+		// objs[i].material.opacity = frequencyData[i] * 0.05;
+		objs[i].rotation.z += frequencyData[i] * 0.0001
+		// objs[i].scale.y = frequencyData[i] * 0.001
+		// objs[i].scale.x = frequencyData[i] * 0.001
 	}
 
 }
