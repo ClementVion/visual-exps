@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 let scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b0b0d);
-let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5);
+let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.x = 0
 camera.position.y = 0;
 camera.position.z = 6;
@@ -23,7 +23,7 @@ let frequencyData = new Uint8Array(analyser.frequencyBinCount);
 let geometries = [];
 let materials = []
 let objs = [];
-let max = 100;
+let max = 500;
 let min = 0;
 let distance = Math.PI * 2 / max
 
@@ -37,8 +37,8 @@ function init() {
 
 		geometries[i] = new THREE.Geometry();
 
-		for (let v = -2; v < 12; v += 0.1) {
-			geometries[i].vertices.push(new THREE.Vector3(0.2, 0, v))
+		for (let v = -1; v < 12; v += 0.1) {
+			geometries[i].vertices.push(new THREE.Vector3(i % 2 === 0 ? 1 : -1, 0, v))
 		}
 
 		objs[i] = new THREE.Line(geometries[i], materials[i]);
@@ -77,16 +77,16 @@ function render(ts) {
 			0, //dX
 		  0, //dY
 		  200, //dZ
-			1,  //size
+			50,  //size
 			frequencyData[i] * 0.0075, //magnitude
 			1000, //speed
 			ts
 		)
 
-		// objs[i].material.color.setHex((frequencyData[i + 10] / 200) * 0xffffff);
-		// objs[i].material.opacity = frequencyData[i] * 0.05;
-		objs[i].rotation.z += frequencyData[i] * 0.0001
-		// objs[i].scale.y = frequencyData[i] * 0.001
+		objs[i].material.color.setHex((frequencyData[i + 10] / 200) * 0xffffff);
+		objs[i].material.opacity = frequencyData[0] * 0.025;
+		// objs[i].rotation.z += frequencyData[0] * 0.001;
+		// objs[i].scale.y = frequencyData[0] * 0.001
 		// objs[i].scale.x = frequencyData[i] * 0.001
 	}
 
